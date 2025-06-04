@@ -13,6 +13,7 @@ env:
   ECR_PUBLIC_REPO_URI: public.ecr.aws/w8h1l6m3/my-ec2-public-repo
   IMAGE_TAG: latest
   IMAGE_URI: public.ecr.aws/w8h1l6m3/my-ec2-public-repo:latest
+  
 
 jobs:
   build-and-deploy:
