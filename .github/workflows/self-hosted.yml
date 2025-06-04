@@ -1,4 +1,4 @@
-name: Java CI/CD with Docker and AWS ECR
+name: self-hosted-ec2
 
 on:
   push:
