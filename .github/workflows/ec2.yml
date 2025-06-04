@@ -7,20 +7,31 @@ on:
     branches: [ main ]
 
 env:
+  GIT_REPO: https://github.com/pavan25aryan/Jenkinsandjava.git
   AWS_REGION: ap-south-1
   ECR_REPO_NAME: my-ec2-public-repo
-  AWS_ACCOUNT_ID: 602982067455
   ECR_PUBLIC_REPO_URI: public.ecr.aws/w8h1l6m3/my-ec2-public-repo
-  IMAGE_TAG: latest
-  IMAGE_URI: public.ecr.aws/w8h1l6m3/my-ec2-public-repo:latest
-  
+  IMAGE_TAG: latest-1
+  AWS_ACCOUNT_ID: 602982067455
+  IMAGE_URI: public.ecr.aws/w8h1l6m3/my-ec2-public-repo:latest-1
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Install AWS CLI
+        run: |
+          echo "Installing AWS CLI..."
+          sudo apt-get update
+          sudo apt-get install -y unzip curl
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+          aws --version
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -43,16 +54,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to AWS Public ECR
+        run: |
+          echo "Logging into AWS Public ECR..."
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
       - name: Build Docker Image
         run: |
+          echo "Building Docker image..."
           docker build -t ${{ env.IMAGE_URI }} .
 
       - name: Push Docker Image to ECR
         run: |
-          echo "Pushing image: ${{ env.IMAGE_URI }}"
+          echo "Pushing Docker image to ECR..."
           docker push ${{ env.IMAGE_URI }}
-          
